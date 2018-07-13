@@ -75,6 +75,11 @@
                 {
                     throw new ArgumentException(nameof(startY));
                 }
+
+                if (mazeModel[startX, startY] == -1)
+                {
+                    throw new ArgumentException("Start at invalid position.");
+                }
             }
         }
 

@@ -187,6 +187,10 @@ namespace MazeLibrary.Tests
             => Assert.Throws<ArgumentException>(() => new MazeSolver(sourceData[1], 0, -2));
 
         [Test]
+        public void MazeSolverConstructor_InvalidPosition_ThrowsArgumentException() =>
+            Assert.Throws<ArgumentException>(() => new MazeSolver(this.sourceData[1], 0, 0));
+
+        [Test]
         public void PassMaze_SuccessfulTests()
         {
             for (int i = 0; i < sourceData.Length; i++)
