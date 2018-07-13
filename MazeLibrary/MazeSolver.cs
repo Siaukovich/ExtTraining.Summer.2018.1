@@ -342,7 +342,8 @@
                 return $"({this.X}, {this.Y})";
             }
         
-        #endregion
         }
+
+        #endregion
     }
 }
