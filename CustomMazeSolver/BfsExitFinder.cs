@@ -1,5 +1,6 @@
 ﻿namespace CustomMazeSolver
 {
+    using System;
     using System.Collections.Generic;
 
     /// <summary>
@@ -10,6 +11,19 @@
         /// <summary>
         /// Starts an algorithm for finding shortest path with BFS.
         /// </summary>
+        /// <param name="maze">
+        /// Maze represented as 2d array.
+        /// </param>
+        /// <param name="start">
+        /// The start.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Cell[]"/>.
+        /// Array that represets path from given start cell to exit.
+        /// </returns>
+        /// <exception cref="ArgumentException">
+        /// Thrown if exit was not found.
+        /// </exception>
         public Cell[] FindExit(int[,] maze, Cell start)
         {
             var queue = new Queue<Cell>();
@@ -45,6 +59,8 @@
                     queue.Enqueue(neighbor);
                 }
             }
+
+            throw new ArgumentException("Exit was not found.");
         }
 
         /// <summary>
