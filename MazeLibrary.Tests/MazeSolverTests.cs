@@ -10,6 +10,10 @@ namespace MazeLibrary.Tests
 
         private readonly int[] startYs = { 5, 4, 0, 1, 2 };
 
+        private readonly int[] startXs = { 1, 0, 3, 0 };
+
+        private readonly int[] startYs = { 0, 1, 5, 4 };
+
         private readonly int[][,] sourceData = new int[][,]
         {
             new int[,]
@@ -134,6 +138,7 @@ namespace MazeLibrary.Tests
                 MazeSolver solver = new MazeSolver(sourceData[i], startXs[i], startYs[i]);
 
                 solver.PassMaze();
+
                 var maze = solver.MazeWithPass();
                 
                 if (!MatrixAreEquals(maze, result[i]))
@@ -163,6 +168,5 @@ namespace MazeLibrary.Tests
 
             return true;
         }
-
     }
 }
