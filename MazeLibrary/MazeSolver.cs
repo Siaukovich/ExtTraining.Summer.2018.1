@@ -18,7 +18,7 @@
         /// <summary>
         /// Coordinate of start position.
         /// </summary>
-        private Cell start;
+        private readonly Cell start;
         
         /// <summary>
         /// Indicates if exit from the maze was found.
@@ -35,10 +35,10 @@
         #region Constructor
 
         /// <summary>
-        /// Initialize data.
+        /// Initializes a new instance of the <see cref="MazeSolver"/> class. 
         /// </summary>
         /// <param name="mazeModel">
-        /// Maze reprezented as matrix.
+        /// Maze represented as matrix.
         /// </param>
         /// <param name="startX">
         /// X coordinate of start.
@@ -89,23 +89,22 @@
         {
             this.triedToFindPath = true;
             
-            // Requires ValueTuple.            
             var queue = new Queue<Cell>();
             queue.Enqueue(this.start);
             
             // Stores true if element vas alredy visited, false if not.
-            var visited = new bool[this.maze.GetLength(0),this.maze.GetLength(1)];
+            var visited = new bool[this.maze.GetLength(0), this.maze.GetLength(1)];
             visited[this.start.X, this.start.Y] = true;
         
             // Stores each passed node parent, so we can restore path later.
-            var parent = new Cell[this.maze.GetLength(0),this.maze.GetLength(1)];
+            var parent = new Cell[this.maze.GetLength(0), this.maze.GetLength(1)];
             var startParent = new Cell(-1, -1);
             parent[this.start.X, this.start.Y] = startParent;
 
-            while (queue.Count != 0 && !exitWasFound)
+            while (queue.Count != 0 && !this.exitWasFound)
             {
                 var current = queue.Dequeue();
-                foreach (var neighbor in GetNeighbors(current, visited))
+                foreach (var neighbor in this.GetNeighbors(current, visited))
                 {
                     if (visited[neighbor.X, neighbor.Y])
                     {
@@ -114,10 +113,10 @@
 
                     parent[neighbor.X, neighbor.Y] = current;
                     
-                    if (IsExit(neighbor))
+                    if (this.IsExit(neighbor))
                     {
-                        exitWasFound = true;
-                        MarkPathOnMazeMatrix(parent, startParent, neighbor);
+                        this.exitWasFound = true;
+                        this.MarkPathOnMazeMatrix(parent, startParent, neighbor);
                         break;
                     }
                     
@@ -138,12 +137,12 @@
         /// </exception>
         public int[,] MazeWithPass()
         {
-            if (!triedToFindPath)
+            if (!this.triedToFindPath)
             {
                 throw new InvalidOperationException("Path finding algorithm was not started.");
             }
 
-            if (!exitWasFound)
+            if (!this.exitWasFound)
             {
                 throw new InvalidOperationException("Path was not found.");
             }
@@ -181,8 +180,8 @@
 
             for (int i = 0; i < path.Count; i++)
             {
-                var element = path[i];
-                maze[element.X, element.Y] = i + 1;
+                Cell element = path[i];
+                this.maze[element.X, element.Y] = i + 1;
             }
         }
 
@@ -211,18 +210,19 @@
         }
 
         /// <summary>
-        /// Finds all neigbors of a given element.
+        /// Finds all neighbors of a given element.
         /// </summary>
         /// <param name="next">
         /// Given element.
         /// </param>
+        /// <param name="visited">
+        /// Array that indicated if element was already visited.
+        /// </param>
         /// <returns>
         /// List of neighbor's coordinates.
         /// </returns>
-        private List<Cell> GetNeighbors(Cell next, bool[,] visited)
+        private IEnumerable<Cell> GetNeighbors(Cell next, bool[,] visited)
         {
-            var neighbors = new List<Cell>();
-
             var left = new Cell(next.X, next.Y - 1);
             var right = new Cell(next.X, next.Y + 1);
             var up = new Cell(next.X - 1, next.Y);
@@ -230,25 +230,23 @@
 
             if (left.Y >= 0 && !visited[left.X, left.Y] && this.maze[left.X, left.Y] != -1)
             {
-                neighbors.Add(left);
+                yield return left;
             }
             
             if (up.X >= 0 && !visited[up.X, up.Y] && this.maze[up.X, up.Y] != -1)
             {
-                neighbors.Add(up);
-            }
-            
-            if (right.Y < this.maze.GetLength(0) && !visited[right.X, right.Y] && this.maze[right.X, right.Y] != -1)
-            {
-                neighbors.Add(right);
-            }
-            
-            if (down.X < this.maze.GetLength(1) && !visited[down.X, down.Y] && this.maze[down.X, down.Y] != -1)
-            {
-                neighbors.Add(down);
+                yield return up;
             }
 
-            return neighbors;
+            if (right.Y < this.maze.GetLength(1) && !visited[right.X, right.Y] && this.maze[right.X, right.Y] != -1)
+            {
+                yield return right;
+            }
+
+            if (down.X < this.maze.GetLength(0) && !visited[down.X, down.Y] && this.maze[down.X, down.Y] != -1)
+            {
+                yield return down;
+            }
         }
         
         /// <summary>
@@ -256,15 +254,46 @@
         /// </summary>
         private class Cell
         {
-            public int X { get; }
-            public int Y { get; }
-
+            /// <summary>
+            /// Initializes a new instance of the <see cref="Cell"/> class.
+            /// </summary>
+            /// <param name="x">
+            /// Cell's x coordinate.
+            /// </param>
+            /// <param name="y">
+            /// Cell's y coordinate.
+            /// </param>
             public Cell(int x, int y)
             {
-                X = x;
-                Y = y;
+                this.X = x;
+                this.Y = y;
             }
 
+            /// <summary>
+            /// Gets this cell X coordinate.
+            /// </summary>
+            public int X { get; }
+
+            /// <summary>
+            /// Gets this cell Y coordinate.
+            /// </summary>
+            public int Y { get; }
+
+            /// <summary>
+            /// The == operator.
+            /// </summary>
+            /// <param name="lhs">
+            /// Left operand.
+            /// </param>
+            /// <param name="rhs">
+            /// Right operand.
+            /// </param>
+            /// <returns>
+            /// True if both cell's coordinates are equal.
+            /// </returns>
+            /// <exception cref="ArgumentNullException">
+            /// Thrown if one of operands was null.
+            /// </exception>
             public static bool operator ==(Cell lhs, Cell rhs)
             {
                 if (lhs == null)
@@ -280,8 +309,29 @@
                 return lhs.X == rhs.X && lhs.Y == rhs.Y;
             }
 
+            /// <summary>
+            /// The != operator.
+            /// </summary>
+            /// <param name="lhs">
+            /// Left operand.
+            /// </param>
+            /// <param name="rhs">
+            /// Right operand.
+            /// </param>
+            /// <returns>
+            /// True if cell's coordinates are not equal.
+            /// </returns>
+            /// <exception cref="ArgumentNullException">
+            /// Thrown if one of operands was null.
+            /// </exception>
             public static bool operator !=(Cell lhs, Cell rhs) => !(lhs == rhs);
 
+            /// <summary>
+            /// String representation of Cell.
+            /// </summary>
+            /// <returns>
+            /// The <see cref="string"/>.
+            /// </returns>
             public override string ToString()
             {
                 return $"({this.X}, {this.Y})";
